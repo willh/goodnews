@@ -42,7 +42,7 @@ async function handle(handlerInput) {
         .getResponse();
   }
 
-  let positiveResults = sentimentResult.resultList.filter(result => result.Sentiment == 'POSITIVE');
+  let positiveResults = sentimentResult.ResultList.filter(result => result.Sentiment == 'POSITIVE');
 
   let topTwoPositiveResults = positiveResults.slice(0, 2);
 
