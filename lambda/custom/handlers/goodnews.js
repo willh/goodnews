@@ -34,16 +34,17 @@ async function handle(handlerInput) {
   try {
     let sentimentResultsOne = await getSentimentFromHeadlines(headlineBatchOne);
     let sentimentResultsTwo = await getSentimentFromHeadlines(headlineBatchTwo);
-    sentimentResults = sentimentResultsOne.ResultList.concat(sentimentResultsTwo.ResultList);
+
+    let resultOne = sentimentResultsOne.ResultList;
+    let resultTwo = mapSentimentResultIndicesBackToOriginalIndices(sentimentResultsTwo.ResultList);
+    sentimentResults = resultOne.concat(resultTwo);
 
     // sort by descending positivity
-    console.log(`Pre-sort: ${JSON.stringify(sentimentResults)}`);
     sentimentResults.sort((a,b) => b.SentimentScore.Positive - a.SentimentScore.Positive);
-    console.log(`Post-sort: ${JSON.stringify(sentimentResults)}`);
 
     // take the top two
     let topPositiveResults = sentimentResults.slice(0, 2);
-    speechText = `The best news we could find was this: ${newsHeadlines[topPositiveResults[0].Index]} , and in other news, ${newsHeadlines[topPositiveResults[1].Index]}`;
+    speechText = `The best news we could find was this: ${newsHeadlines[topPositiveResults[0].Index]}, and in other news, ${newsHeadlines[topPositiveResults[1].Index]}`;
   } catch (error) {
     console.log(error)
     speechText = "Sorry, there's no good news, as there was a problem getting good news results";
@@ -54,8 +55,16 @@ async function handle(handlerInput) {
     .getResponse();
 }
 
+function mapSentimentResultIndicesBackToOriginalIndices(results) {
+  // all the 'Index' entries in batch 2 start at 0 so to map them back to position in the
+  // original headline list we need to take each of them and increment by 25
+  return results.map(result => {
+    result.Index += 25;
+    return result;
+  });
+}
+
 async function getSentimentFromHeadlines(newsHeadlines) {
-  // call sentiment analysis here, ditch the bad ones
   let params = {
     LanguageCode: "en",
     TextList: newsHeadlines
