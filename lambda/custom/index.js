@@ -2,6 +2,7 @@
 // Please visit https://alexa.design/cookbook for additional examples on implementing slots, dialog management,
 // session persistence, api calls, and more.
 const Alexa = require('ask-sdk-core');
+const GoodNews = require('./handlers/goodnews');
 
 const LaunchRequestHandler = {
     canHandle(handlerInput) {
@@ -15,19 +16,12 @@ const LaunchRequestHandler = {
         .getResponse();
     }
 };
-const HelloWorldIntentHandler = {
-    canHandle(handlerInput) {
-      return handlerInput.requestEnvelope.request.type === 'IntentRequest'
-        && handlerInput.requestEnvelope.request.intent.name === 'HelloWorldIntent';
-    },
-    handle(handlerInput) {
-      const speechText = 'Hello World!';
-      return handlerInput.responseBuilder
-        .speak(speechText)
-        //.reprompt('add a reprompt if you want to keep the session open for the user to respond')
-        .getResponse();
-    }
+
+const GoodNewsIntentHandler = {
+    canHandle: GoodNews.canHandle,
+    handle: GoodNews.handle
 };
+
 const HelpIntentHandler = {
     canHandle(handlerInput) {
       return handlerInput.requestEnvelope.request.type === 'IntentRequest'
@@ -79,7 +73,6 @@ const IntentReflectorHandler = {
  
       return handlerInput.responseBuilder
         .speak(speechText)
-        //.reprompt('add a reprompt if you want to keep the session open for the user to respond')
         .getResponse();
    }
 };
@@ -108,7 +101,7 @@ const ErrorHandler = {
 exports.handler = Alexa.SkillBuilders.custom()
   .addRequestHandlers(
     LaunchRequestHandler,
-    HelloWorldIntentHandler,
+    GoodNewsIntentHandler,
     HelpIntentHandler,
     CancelAndStopIntentHandler,
     SessionEndedRequestHandler,

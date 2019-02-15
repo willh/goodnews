@@ -5,17 +5,16 @@
         "en-US": {
           "summary": "A basic skill made from Alexa Skills Kit template",
           "examplePhrases": [
-            "Alexa open hello node",
-            "Alexa tell hello node hello",
-            "Alexa ask hello node say hello"
+            "Alexa, tell me some good news",
+            "Alexa show me good news"
           ],
-          "name": "hello node",
-          "description": "A basic skill made from Alexa Skills Kit template"
+          "name": "Good News",
+          "description": "Filters news headlines by positive sentiment"
         }
       },
       "isAvailableWorldwide": true,
       "testingInstructions": "Sample Testing Instructions.",
-      "category": "EDUCATION_AND_REFERENCE",
+      "category": "NEWS",
       "distributionCountries": []
     },
     "apis": {
