@@ -20,6 +20,9 @@ async function handle(handlerInput) {
   }).then(response => {
     newsHeadlines = getHeadlineDescriptions(response);
   });
+
+  // remove any empty string headlines which will break downstream
+  newsHeadlines = newsHeadlines.filter(headline => headline.length > 1);
   console.log(newsHeadlines);
 
   // call sentiment analysis here, ditch the bad ones
