@@ -1,7 +1,8 @@
 // require news API
 // require AWS SDK
 const NewsAPI = require('newsapi');
-const newsapi = new NewsAPI('833f7b79d8844671a19d8d194d046282');
+const newsApiKey = process.env.newsApiKey;
+const newsapi = new NewsAPI(newsApiKey);
 
 function canHandle(handlerInput) {
   return handlerInput.requestEnvelope.request.type === 'IntentRequest'
@@ -25,16 +26,17 @@ async function handle(handlerInput) {
   // ditch the negative results... which might be a lot
 
   // take the first 1-2 positive ones and add into the response
-  
+
   const speechText = "You asked for some good news";
       return handlerInput.responseBuilder
         .speak(speechText)
         .getResponse();
 }
 
-module.exports.canHandle = canHandle
-module.exports.handle = handle
-
 function getHeadlineDescriptions(headlinesResponse) {
   return headlinesResponse.articles.map(article => article.description);
 }
+
+module.exports.canHandle = canHandle
+module.exports.handle = handle
+
