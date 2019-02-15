@@ -14,47 +14,61 @@ async function handle(handlerInput) {
   // WIP news API
   let newsHeadlines;
   await newsapi.v2.topHeadlines({
-    sources: 'bbc-news,google-news-uk',
+    sources: 'bbc-news,google-news-uk,the-guardian-uk',
     language: 'en',
-    pageSize: 25
+    pageSize: 50
   }).then(response => {
     newsHeadlines = getHeadlineDescriptions(response);
   });
 
   // remove any empty string headlines which will break downstream
   newsHeadlines = newsHeadlines.filter(headline => headline.length > 1);
-  console.log(newsHeadlines);
+  console.log(`Headlines: ${JSON.stringify(newsHeadlines)}`);
 
+  // sentiment analysis only works in batches with 25 record max
+  let headlineBatchOne = newsHeadlines.slice(0,25);
+  let headlineBatchTwo = newsHeadlines.slice(25,50);
+
+  let sentimentResults, speechText;
+  
+  try {
+    let sentimentResultsOne = await getSentimentFromHeadlines(headlineBatchOne);
+    let sentimentResultsTwo = await getSentimentFromHeadlines(headlineBatchTwo);
+    sentimentResults = sentimentResultsOne.ResultList.concat(sentimentResultsTwo.ResultList);
+
+    // sort by descending positivity
+    console.log(`Pre-sort: ${JSON.stringify(sentimentResults)}`);
+    sentimentResults.sort((a,b) => b.SentimentScore.Positive - a.SentimentScore.Positive);
+    console.log(`Post-sort: ${JSON.stringify(sentimentResults)}`);
+
+    // take the top two
+    let topPositiveResults = sentimentResults.slice(0, 2);
+    speechText = `The best news we could find was this: ${newsHeadlines[topPositiveResults[0].Index]} , and in other news, ${newsHeadlines[topPositiveResults[1].Index]}`;
+  } catch (error) {
+    console.log(error)
+    speechText = "Sorry, there's no good news, as there was a problem getting good news results";
+  }
+
+  return handlerInput.responseBuilder
+    .speak(speechText)
+    .getResponse();
+}
+
+async function getSentimentFromHeadlines(newsHeadlines) {
   // call sentiment analysis here, ditch the bad ones
   let params = {
     LanguageCode: "en",
     TextList: newsHeadlines
   };
 
-  let sentimentResult;
   try {
-    sentimentResult = await comprehend.batchDetectSentiment(params).promise();
+    let sentimentResult = await comprehend.batchDetectSentiment(params).promise();
     console.log(JSON.stringify(sentimentResult));
+    return sentimentResult;
   } catch (error) {
     console.log(`oh dear god no! ${error}`);
-    return handlerInput.responseBuilder
-        .speak("Sorry, something went horribly wrong")
-        .getResponse();
+    throw error;
   }
-
-  let positiveResults = sentimentResult.ResultList.filter(result => result.Sentiment == 'POSITIVE');
-
-  let topTwoPositiveResults = positiveResults.slice(0, 2);
-
-  let speechText = topTwoPositiveResults.join(", and in other news, ");
-
-  if (topTwoPositiveResults.length == 0) {
-    speechText = "Sorry, not a lot of good news today";
-  }
-  
-  return handlerInput.responseBuilder
-    .speak(speechText)
-    .getResponse();
 }
 
 function getHeadlineDescriptions(headlinesResponse) {
@@ -63,4 +77,3 @@ function getHeadlineDescriptions(headlinesResponse) {
 
 module.exports.canHandle = canHandle
 module.exports.handle = handle
-

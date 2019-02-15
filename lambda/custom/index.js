@@ -9,7 +9,7 @@ const LaunchRequestHandler = {
       return handlerInput.requestEnvelope.request.type === 'LaunchRequest';
     },
     handle(handlerInput) {
-      const speechText = "Welcome, you can say 'tell me some good news' to filter your news for some positive news?";
+      const speechText = "Welcome, you can say 'tell me some good news' to filter your news for some positive news";
       return handlerInput.responseBuilder
         .speak(speechText)
         .reprompt(speechText)
