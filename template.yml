@@ -47,6 +47,8 @@ Resources:
           Action: sts:AssumeRole
       Path: /
       ManagedPolicyArns:
+        # for this additional policy to work we'll need to add general comprehend permissions to the permission boundary
+        -  arn:aws:iam::aws:policy/ComprehendFullAccess
         -  arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
       PermissionsBoundary: !Sub 'arn:${AWS::Partition}:iam::${AWS::AccountId}:policy/CodeStar_${ProjectId}_PermissionsBoundary'
 
